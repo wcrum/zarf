@@ -1,6 +1,9 @@
 package packager
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/defenseunicorns/zarf/cli/config"
 	"github.com/defenseunicorns/zarf/cli/internal/message"
 	"github.com/defenseunicorns/zarf/cli/internal/packager/validate"
@@ -8,11 +11,11 @@ import (
 	"github.com/defenseunicorns/zarf/cli/types"
 )
 
-func GetComposedAssets() (components []types.ZarfComponent) {
+func GetComposedAssets(tempPath tempPaths) (components []types.ZarfComponent) {
 	for _, component := range config.GetComponents() {
 		// Build components list by expanding imported components.
 		if shouldAddImportedPackage(&component) {
-			importedComponents := getSubPackageAssets(component)
+			importedComponents := getSubPackageAssets(component, tempPath)
 			components = append(components, importedComponents...)
 
 		} else {
@@ -26,13 +29,13 @@ func GetComposedAssets() (components []types.ZarfComponent) {
 }
 
 // Get the sub package components to add to parent assets, recurses on sub imports.
-func getSubPackageAssets(importComponent types.ZarfComponent) (components []types.ZarfComponent) {
-	importedPackage := getSubPackage(&importComponent)
+func getSubPackageAssets(importComponent types.ZarfComponent, tempPath tempPaths) (components []types.ZarfComponent) {
+	importedPackage := getSubPackage(&importComponent, tempPath)
 	for _, componentToCompose := range importedPackage.Components {
 		if shouldAddImportedPackage(&componentToCompose) {
-			components = append(components, getSubPackageAssets(componentToCompose)...)
+			components = append(components, getSubPackageAssets(componentToCompose, tempPath)...)
 		} else {
-			prepComponentToCompose(&componentToCompose, importedPackage.Metadata.Name, importComponent.Import.Path)
+			prepComponentToCompose(&componentToCompose, importedPackage.Metadata.Name, &importComponent, tempPath)
 			components = append(components, componentToCompose)
 		}
 	}
@@ -61,15 +64,41 @@ func hasSubPackage(component *types.ZarfComponent) bool {
 }
 
 // Reads the locally imported zarf.yaml
-func getSubPackage(component *types.ZarfComponent) (importedPackage types.ZarfPackage) {
-	utils.ReadYaml(component.Import.Path+"zarf.yaml", &importedPackage)
+func getSubPackage(component *types.ZarfComponent, tempPath tempPaths) (importedPackage types.ZarfPackage) {
+	componentPath := component.Import.Path + "zarf.yaml"
+	if utils.IsUrl(component.Import.Path) {
+		componentPath = downloadRemoteFile(component.Import.Path, component.Name, "zarf.yaml", tempPath)
+	}
+	utils.ReadYaml(componentPath, &importedPackage)
 	return importedPackage
 }
 
-// Updates the name and sets all local asset paths relative to the importing package.
-func prepComponentToCompose(component *types.ZarfComponent, parentPackageName string, importPath string) {
-	component.Name = parentPackageName + "-" + component.Name
+func downloadRemoteFile(componentPath string, componentName string, filePath string, tempPaths tempPaths) (destinationFile string) {
+	importPath := tempPaths.base + "/imports/" + componentName
+	_ = utils.CreateDirectory(importPath, 0700)
+	folders := strings.Split(filePath, "/")
+	fileName := folders[len(folders)-1]
+	if len(folders) > 1 {
+		for _, folder := range folders[0 : len(folders)-1] {
+			importPath = importPath + "/" + folder
+			_ = utils.CreateDirectory(importPath, 0700)
+		}
+	} else {
+		fileName = filePath
+	}
+	destinationFile = importPath + "/" + fileName
+	fmt.Println("Component Path: ")
+	fmt.Println(componentPath)
+	fmt.Println("Destination Path: ")
+	fmt.Println(destinationFile)
+	utils.DownloadToFile(componentPath+filePath, destinationFile)
+	return destinationFile
+}
 
+// Updates the name and sets all local asset paths relative to the importing package.
+func prepComponentToCompose(component *types.ZarfComponent, parentPackageName string, importComponent *types.ZarfComponent, tempPaths tempPaths) {
+	component.Name = parentPackageName + "-" + component.Name
+	importPath := importComponent.Import.Path
 	// Add import path to local component files.
 	for fileIdx, file := range component.Files {
 		if !utils.IsUrl(file.Source) {
@@ -89,8 +118,13 @@ func prepComponentToCompose(component *types.ZarfComponent, parentPackageName st
 	// Add import path to local manifest files and kustomizations
 	for manifestIdx, manifest := range component.Manifests {
 		for fileIdx, file := range manifest.Files {
+			newFilePath := importPath + file
 			if !utils.IsUrl(file) {
-				component.Manifests[manifestIdx].Files[fileIdx] = importPath + file
+				if utils.IsUrl(newFilePath) {
+					component.Manifests[manifestIdx].Files[fileIdx] = downloadRemoteFile(importComponent.Import.Path, importComponent.Name, file, tempPaths)
+				} else {
+					component.Manifests[manifestIdx].Files[fileIdx] = newFilePath
+				}
 			}
 		}
 		for kustomIdx, kustomization := range manifest.Kustomizations {

@@ -7,4 +7,4 @@ components:
   - name: games
     required: true
     import: 
-     path: '../game/'
+     path: https://raw.githubusercontent.com/defenseunicorns/zarf/master/examples/game/zarf.yaml

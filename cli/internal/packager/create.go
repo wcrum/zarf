@@ -30,7 +30,7 @@ func Create() {
 	tempPath := createPaths()
 	defer tempPath.clean()
 
-	components := GetComposedAssets()
+	components := GetComposedAssets(tempPath)
 	seedImages := config.GetSeedImages()
 	packageName := config.GetPackageName()
 	dataInjections := config.GetDataInjections()
