@@ -93,7 +93,12 @@ func prepComponentToCompose(component *types.ZarfComponent, parentPackageName st
 	// Add import path to local component files.
 	for fileIdx, file := range component.Files {
 		if !utils.IsUrl(file.Source) {
-			component.Files[fileIdx].Source = importPath + file.Source
+			newFilePath := importPath + file.Source
+			if utils.IsUrl(newFilePath) {
+				component.Files[fileIdx].Source = downloadRemoteFile(importComponent.Import.Path, importComponent.Name, file, tempPaths)
+			} else {
+				component.Files[fileIdx].Source = newFilePath
+			}
 		}
 	}
 
@@ -101,7 +106,12 @@ func prepComponentToCompose(component *types.ZarfComponent, parentPackageName st
 	for chartIdx, chart := range component.Charts {
 		for valuesIdx, valuesFile := range chart.ValuesFiles {
 			if !utils.IsUrl(valuesFile) {
-				component.Charts[chartIdx].ValuesFiles[valuesIdx] = importPath + valuesFile
+				newFilePath := importPath + valuesFile
+				if utils.IsUrl(newFilePath) {
+					component.Charts[chartIdx].ValuesFiles[valuesIdx] = downloadRemoteFile(importComponent.Import.Path, importComponent.Name, file, tempPaths)
+				} else {
+					component.Charts[chartIdx].ValuesFiles[valuesIdx] = newFilePath
+				}
 			}
 		}
 	}
