@@ -36,6 +36,7 @@ type tempPaths struct {
 	images         string
 	dataInjections string
 	components     string
+	imports        string
 }
 
 func createPaths() tempPaths {
@@ -46,6 +47,7 @@ func createPaths() tempPaths {
 		images:         basePath + "/images.tar",
 		dataInjections: basePath + "/data",
 		components:     basePath + "/components",
+		imports:        basePath + "/imports",
 	}
 }
 

@@ -1,7 +1,6 @@
 package packager
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/defenseunicorns/zarf/cli/config"
@@ -73,24 +72,18 @@ func getSubPackage(component *types.ZarfComponent, tempPath tempPaths) (imported
 	return importedPackage
 }
 
-func downloadRemoteFile(componentPath string, componentName string, filePath string, tempPaths tempPaths) (destinationFile string) {
-	importPath := tempPaths.base + "/imports/" + componentName
-	_ = utils.CreateDirectory(importPath, 0700)
-	folders := strings.Split(filePath, "/")
+func downloadRemoteFile(componentPath string, importComponentName string, filePath string, tempPaths tempPaths) (destinationFile string) {
+	importPath := tempPaths.imports
+	importFilePath := importComponentName + "/" + filePath
+	folders := strings.Split(importFilePath, "/")
 	fileName := folders[len(folders)-1]
 	if len(folders) > 1 {
 		for _, folder := range folders[0 : len(folders)-1] {
-			importPath = importPath + "/" + folder
+			importPath := importPath + "/" + folder
 			_ = utils.CreateDirectory(importPath, 0700)
 		}
-	} else {
-		fileName = filePath
 	}
 	destinationFile = importPath + "/" + fileName
-	fmt.Println("Component Path: ")
-	fmt.Println(componentPath)
-	fmt.Println("Destination Path: ")
-	fmt.Println(destinationFile)
 	utils.DownloadToFile(componentPath+filePath, destinationFile)
 	return destinationFile
 }

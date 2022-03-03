@@ -53,22 +53,12 @@ func DownloadToFile(url string, target string) {
 		message.Fatalf(nil, "Bad HTTP status: %s", resp.Status)
 	}
 
-	// b, err := io.ReadAll(resp.Body)
-	// b, err := ioutil.ReadAll(resp.Body)  Go.1.15 and earlier
-	// if err != nil {
-	// 	message.Fatalf(nil, "Bad Http body")
-	// }
-
 	// Writer the body to file
 	text := fmt.Sprintf("Downloading %s", url)
-	// if _, err = io.Copy(destinationFile, io.TeeReader(resp.Body, counter)); err != nil {
-	// 	_, _ = counter.progress.Stop()
-	// 	message.Fatalf(err, "Unable to save the file %s", target)
-	// }
+	if _, err = io.Copy(destinationFile, resp.Body); err != nil {
+		message.Fatalf(err, "Unable to save the file %s", target)
+	}
 
-	io.Copy(destinationFile, resp.Body)
-
-	// _, _ = counter.progress.Stop()
 	pterm.Success.Println(text)
 }
 
