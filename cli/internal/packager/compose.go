@@ -77,11 +77,9 @@ func downloadRemoteFile(componentPath string, importComponentName string, filePa
 	importFilePath := importComponentName + "/" + filePath
 	folders := strings.Split(importFilePath, "/")
 	fileName := folders[len(folders)-1]
-	if len(folders) > 1 {
-		for _, folder := range folders[0 : len(folders)-1] {
-			importPath := importPath + "/" + folder
-			_ = utils.CreateDirectory(importPath, 0700)
-		}
+	for _, folder := range folders[0 : len(folders)-1] {
+		importPath = importPath + "/" + folder
+		_ = utils.CreateDirectory(importPath, 0700)
 	}
 	destinationFile = importPath + "/" + fileName
 	utils.DownloadToFile(componentPath+filePath, destinationFile)
