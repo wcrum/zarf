@@ -71,17 +71,17 @@ func getSubPackage(component *types.ZarfComponent, tempPath tempPaths) (imported
 	// Import.Path is a remote package file.
 	if utils.IsUrl(component.Import.Path) {
 		// Download to temp folder before reading the packages yaml.
-		componentPath = downloadRemoteFile(component.Import.Path, component.Name, "zarf.yaml", tempPath)
+		componentPath = downloadRemoteFile(component.Import.Path, "zarf.yaml", component.Name, tempPath)
 	}
 	utils.ReadYaml(componentPath, &importedPackage)
 	return importedPackage
 }
 
 // Downloads remote file to temp folder with structure of original package.
-func downloadRemoteFile(componentPath string, importComponentName string, filePath string, tempPaths tempPaths) (destinationFile string) {
+func downloadRemoteFile(importPrefix string, originalPath string, componentName string, tempPaths tempPaths) (destinationFile string) {
 	importPath := tempPaths.imports
 	// Create the temp file path for imported component.
-	importFilePath := importComponentName + "/" + filePath
+	importFilePath := componentName + "/" + originalPath
 	// Create slice of directories in the imported files path.
 	directories := strings.Split(importFilePath, "/")
 	// Retrieve the file name to copy downloaded contents to.
@@ -94,7 +94,7 @@ func downloadRemoteFile(componentPath string, importComponentName string, filePa
 	// Create the destination file path.
 	destinationFile = importPath + "/" + fileName
 	// Download to the created file.
-	utils.DownloadToFile(componentPath+filePath, destinationFile)
+	utils.DownloadToFile(importPrefix+originalPath, destinationFile)
 
 	return destinationFile
 }
@@ -106,57 +106,38 @@ func prepComponentToCompose(component *types.ZarfComponent, parentPackageName st
 
 	// Prefix composed component file paths.
 	for fileIdx, file := range component.Files {
-		composedPath := getComposedFilePath(file.Source, importPath)
-		if composedPath != file.Source {
-			if utils.IsUrl(composedPath) {
-				composedPath = downloadRemoteFile(importPath, parentPackageName, file.Source, tempPaths)
-			}
-			component.Files[fileIdx].Source = composedPath
-		}
+		component.Files[fileIdx].Source = getComposedFilePath(file.Source, importPath, parentPackageName, tempPaths)
 	}
 
 	// Prefix non-url composed component chart values files.
 	for chartIdx, chart := range component.Charts {
 		for valuesIdx, valuesFile := range chart.ValuesFiles {
-			composedPath := getComposedFilePath(valuesFile, importPath)
-			if composedPath != valuesFile {
-				if utils.IsUrl(composedPath) {
-					composedPath = downloadRemoteFile(importPath, parentPackageName, valuesFile, tempPaths)
-				}
-				component.Charts[chartIdx].ValuesFiles[valuesIdx] = composedPath
-			}
+			component.Charts[chartIdx].ValuesFiles[valuesIdx] = getComposedFilePath(valuesFile, importPath, parentPackageName, tempPaths)
 		}
 	}
 
 	// Prefix non-url composed manifest files and kustomizations.
 	for manifestIdx, manifest := range component.Manifests {
 		for fileIdx, file := range manifest.Files {
-			composedPath := getComposedFilePath(file, importPath)
-			if composedPath != file {
-				if utils.IsUrl(composedPath) {
-					composedPath = downloadRemoteFile(importPath, parentPackageName, file, tempPaths)
-				}
-				component.Manifests[manifestIdx].Files[fileIdx] = composedPath
-			}
+			component.Manifests[manifestIdx].Files[fileIdx] = getComposedFilePath(file, importPath, parentPackageName, tempPaths)
 		}
 		for kustomIdx, kustomization := range manifest.Kustomizations {
-			composedPath := getComposedFilePath(kustomization, importPath)
-			if composedPath != kustomization {
-				if utils.IsUrl(composedPath) {
-					composedPath = downloadRemoteFile(importPath, parentPackageName, kustomization, tempPaths)
-				}
-				component.Manifests[manifestIdx].Kustomizations[kustomIdx] = composedPath
-			}
+			component.Manifests[manifestIdx].Kustomizations[kustomIdx] = getComposedFilePath(kustomization, importPath, parentPackageName, tempPaths)
 		}
 	}
 }
 
 // Prefix file path with importPath if original file path is not a url.
-func getComposedFilePath(originalPath string, pathPrefix string) (composedFilePath string) {
-	composedFilePath = originalPath
+func getComposedFilePath(originalPath string, pathPrefix string, parentName string, tempPaths tempPaths) (composedFilePath string) {
+	// Return original if url.
+	if utils.IsUrl(originalPath) {
+		return originalPath
+	}
 	// Only prefix if the path is not a url.
-	if !utils.IsUrl(composedFilePath) {
-		composedFilePath = pathPrefix + composedFilePath
+	composedFilePath = pathPrefix + composedFilePath
+	// If new path is url download the remote file and get the temp path.
+	if utils.IsUrl(composedFilePath) {
+		composedFilePath = downloadRemoteFile(pathPrefix, originalPath, parentName, tempPaths)
 	}
 	return composedFilePath
 }
