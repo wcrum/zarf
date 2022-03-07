@@ -1,4 +1,4 @@
-# Zarf Composable Packages Example
+# Zarf Web Composable Packages
 
 This example demonstrates using Zarf to compose existing zarf packages into another package.
 
