@@ -129,12 +129,12 @@ func prepComponentToCompose(component *types.ZarfComponent, parentPackageName st
 
 // Prefix file path with importPath if original file path is not a url.
 func getComposedFilePath(originalPath string, pathPrefix string, parentName string, tempPaths tempPaths) (composedFilePath string) {
+	// Only prefix if the path is not a url.
+	composedFilePath = pathPrefix + composedFilePath
 	// Return original if url.
 	if utils.IsUrl(originalPath) {
 		return originalPath
 	}
-	// Only prefix if the path is not a url.
-	composedFilePath = pathPrefix + composedFilePath
 	// If new path is url download the remote file and get the temp path.
 	if utils.IsUrl(composedFilePath) {
 		composedFilePath = downloadRemoteFile(pathPrefix, originalPath, parentName, tempPaths)

@@ -4,7 +4,7 @@ metadata:
   description: "Demo Zarf package composability"
 
 components:
-  - name: games-local
+  - name: games-remote
     required: false
-    import:
-      path: "../game"
+    import: 
+     path: https://raw.githubusercontent.com/defenseunicorns/zarf/master/examples/game/zarf.yaml
