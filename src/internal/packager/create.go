@@ -17,7 +17,6 @@ import (
 	"github.com/defenseunicorns/zarf/src/internal/helm"
 	"github.com/defenseunicorns/zarf/src/internal/images"
 	"github.com/defenseunicorns/zarf/src/internal/message"
-	"github.com/defenseunicorns/zarf/src/internal/sbom"
 	"github.com/defenseunicorns/zarf/src/internal/utils"
 	"github.com/mholt/archiver/v3"
 )
@@ -53,7 +52,7 @@ func Create() {
 		// Load seed images into their own happy little tarball for ease of import on init
 		pulledImages := images.PullAll([]string{seedImage}, tempPath.seedImage)
 		_ = utils.CreateDirectory(tempPath.sboms, 0700)
-		sbom.CatalogImages(pulledImages, tempPath.sboms, tempPath.seedImage)
+		CatalogImages(pulledImages, tempPath.sboms, tempPath.seedImage)
 	}
 
 	var combinedImageList []string
@@ -68,7 +67,7 @@ func Create() {
 		uniqueList := removeDuplicates(combinedImageList)
 		pulledImages := images.PullAll(uniqueList, tempPath.images)
 		_ = utils.CreateDirectory(tempPath.sboms, 0700)
-		sbom.CatalogImages(pulledImages, tempPath.sboms, tempPath.images)
+		CatalogImages(pulledImages, tempPath.sboms, tempPath.images)
 	}
 
 	_ = os.RemoveAll(packageName)

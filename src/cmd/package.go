@@ -52,6 +52,17 @@ var packageInspectCmd = &cobra.Command{
 	},
 }
 
+var packageSbomCmd = &cobra.Command{
+	Use:     "sbom [PACKAGE]",
+	Aliases: []string{"s"},
+	Short:   "Output the SBOM for an image within the package (runs offline)",
+	Args:    cobra.MaximumNArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		packageName := choosePackage(args)
+		packager.PresentSbom(packageName)
+	},
+}
+
 func choosePackage(args []string) string {
 	if len(args) > 0 {
 		return args[0]
@@ -73,6 +84,7 @@ func init() {
 	packageCmd.AddCommand(packageCreateCmd)
 	packageCmd.AddCommand(packageDeployCmd)
 	packageCmd.AddCommand(packageInspectCmd)
+	packageCmd.AddCommand(packageSbomCmd)
 
 	packageCreateCmd.Flags().BoolVar(&config.DeployOptions.Confirm, "confirm", false, "Confirm package creation without prompting")
 	packageDeployCmd.Flags().BoolVar(&config.DeployOptions.Confirm, "confirm", false, "Confirm package deployment without prompting")
