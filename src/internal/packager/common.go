@@ -14,7 +14,6 @@ import (
 
 	"github.com/defenseunicorns/zarf/src/types"
 	"github.com/pterm/pterm"
-	"gopkg.in/yaml.v2"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/defenseunicorns/zarf/src/config"
@@ -77,18 +76,18 @@ func createComponentPaths(basePath string, component types.ZarfComponent) compon
 
 func confirmAction(configPath, userMessage string, sbomViewFiles []string) bool {
 
-	active := config.GetActiveConfig()
+	// active := config.GetActiveConfig()
 
-	content, err := yaml.Marshal(active)
-	if err != nil {
-		message.Fatal(err, "Unable to open the package config file")
-	}
+	// content, err := yaml.Marshal(active)
+	// if err != nil {
+	// message.Fatal(err, "Unable to open the package config file")
+	// }
 
 	// Convert []byte to string and print to screen
-	text := string(content)
+	// text := string(content)
 
 	pterm.Println()
-	utils.ColorPrintYAML(text)
+	// utils.ColorPrintYAML(text)
 
 	if len(sbomViewFiles) > 0 {
 		cwd, _ := os.Getwd()

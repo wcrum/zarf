@@ -6,6 +6,7 @@ type ZarfDeployOptions struct {
 	Confirm     bool
 	Components  string
 	SGetKeyPath string
+	SetValues   []string
 
 	// Zarf init is installing the k3s component
 	ApplianceMode bool
@@ -22,6 +23,7 @@ type ZarfCreateOptions struct {
 	ImageCachePath  string
 	Insecure        bool
 	OutputDirectory string
+	SetValues       []string
 }
 
 type ConnectString struct {

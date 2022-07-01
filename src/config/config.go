@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/defenseunicorns/zarf/src/types"
+	"github.com/sirupsen/logrus"
 
 	"github.com/defenseunicorns/zarf/src/internal/message"
 	"github.com/defenseunicorns/zarf/src/internal/utils"
@@ -233,6 +234,21 @@ func BuildConfig(path string) error {
 	// Record the name of the user creating the package
 	active.Build.User = currentUser
 
+	// Override the values that the user provided '--set' for...
+	message.Warnf("@JPERRY the create values we're trying to override: %+v", CreateOptions.SetValues)
+	base := map[string]interface{}{} //TODO: @JPERRY How does helm merge this 'base' map back into their struct
+	fmt.Printf("%v", base)
+
+	// options.MergeValues() from Helm
+	logrus.Warnf("@JPERRY Base before merging: %+v\n\n\n", base)
+	for _, overrideString := range CreateOptions.SetValues {
+		ParseInto(overrideString, base)
+	}
+
+	logrus.Warnf("@JPERRY Base after merging: %+v\n\n\n", base)
+
+	mergeBaseIntoActive(base)
+
 	return utils.WriteYaml(path, active, 0400)
 }
 
@@ -267,4 +283,15 @@ func isCompatibleComponent(component types.ZarfComponent, filterByOS bool) bool 
 	}
 
 	return validArch && validOS
+}
+
+func CoalescePackageValues(zarfPackage types.ZarfPackage, overrideValues map[string]interface{}) {
+
+}
+
+func mergeBaseIntoActive(base map[string]interface{}) {
+	for key, value := range base {
+
+		message.Warnf("key: %v   value: %+v", key, value)
+	}
 }

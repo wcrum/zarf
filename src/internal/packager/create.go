@@ -43,7 +43,7 @@ func Create(baseDir string) {
 	components := GetComposedComponents()
 	seedImage := config.GetSeedImage()
 
-	configFile := tempPath.base + "/zarf.yaml"
+	configFile := filepath.Join(tempPath.base, "zarf.yaml")
 
 	// Save the transformed config
 	if err := config.BuildConfig(configFile); err != nil {
