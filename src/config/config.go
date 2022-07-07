@@ -58,7 +58,8 @@ var (
 	// DeployOptions tracks user-defined values for the active deployment
 	DeployOptions types.ZarfDeployOptions
 
-	CliArch string
+	InitOptions types.ZarfInitOptions
+	CliArch     string
 
 	ZarfSeedPort string
 
@@ -204,6 +205,10 @@ func LoadConfig(path string, filterByOS bool) error {
 
 func GetActiveConfig() types.ZarfPackage {
 	return active
+}
+
+func GetGitServerInfo() types.GitServerInfo {
+	return state.GitServerInfo
 }
 
 func BuildConfig(path string) error {
