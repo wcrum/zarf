@@ -7,6 +7,7 @@ import (
 	"github.com/defenseunicorns/zarf/src/config"
 	"github.com/defenseunicorns/zarf/src/internal/agent/operations"
 	"github.com/defenseunicorns/zarf/src/internal/git"
+	"github.com/defenseunicorns/zarf/src/internal/k8s"
 	"github.com/defenseunicorns/zarf/src/internal/message"
 	v1 "k8s.io/api/admission/v1"
 )
@@ -34,6 +35,18 @@ func NewGitRepositoryMutationHook() operations.Hook {
 func mutateGitRepository(r *v1.AdmissionRequest) (*operations.Result, error) {
 	var patches []operations.PatchOperation
 
+	state := k8s.LoadZarfState()
+
+	// Default to the InCluster gitURL but check if we initialized with an external server
+	gitServerURL := config.ZarfInClusterGitServiceURL
+	if !state.GitServerInfo.InternalServer {
+		gitServerURL = state.GitServerInfo.GitAddress
+
+		if state.GitServerInfo.GitPort != 0 {
+			gitServerURL += fmt.Sprintf(":%d", state.GitServerInfo.GitPort)
+		}
+	}
+
 	// parse to simple struct to read the git url
 	gitRepo := &GenericGitRepo{}
 	if err := json.Unmarshal(r.Object.Raw, &gitRepo); err != nil {
@@ -42,7 +55,7 @@ func mutateGitRepository(r *v1.AdmissionRequest) (*operations.Result, error) {
 
 	message.Info(gitRepo.Spec.URL)
 
-	replacedURL := git.MutateGitUrlsInText("http://zarf-gitea-http.zarf.svc.cluster.local:3000", gitRepo.Spec.URL)
+	replacedURL := git.MutateGitUrlsInText(gitServerURL, gitRepo.Spec.URL)
 	patches = append(patches, operations.ReplacePatchOperation("/spec/url", replacedURL))
 
 	// If a prior secret exists, replace it

@@ -41,7 +41,7 @@ func preSeedRegistry(tempPath tempPaths) {
 		spinner.Updatef("New cluster, no prior Zarf deployments found")
 
 		// If the K3s component is being deployed, skip distro detection
-		if config.InitOptions.ApplianceMode {
+		if config.DeployOptions.ApplianceMode {
 			distro = k8s.DistroIsK3s
 			state.ZarfAppliance = true
 		} else {
@@ -111,6 +111,15 @@ func preSeedRegistry(tempPath tempPaths) {
 	}
 	if config.InitOptions.StorageClass != "" {
 		state.StorageClass = config.InitOptions.StorageClass
+	}
+
+	if config.InitOptions.GitServerInfo.GitAddress != "" {
+		state.GitServerInfo = config.InitOptions.GitServerInfo
+	} else {
+		state.GitServerInfo.GitAddress = "http://" + config.IPV4Localhost
+		state.GitServerInfo.GitPort = 3000
+		state.GitServerInfo.GitUsername = config.ZarfGitPushUser
+		state.GitServerInfo.InternalServer = true
 	}
 
 	spinner.Success()
