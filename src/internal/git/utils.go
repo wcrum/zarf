@@ -28,12 +28,17 @@ type Credential struct {
 
 func MutateGitUrlsInText(host string, text string) string {
 	extractPathRegex := regexp.MustCompilePOSIX(`https?://[^/]+/(.*\.git)`)
+
+	// Get the GitPushUsername
+	zarfState := k8s.LoadZarfState()
+	zarfGitPushUser := zarfState.GitServerInfo.GitUsername
+
 	output := extractPathRegex.ReplaceAllStringFunc(text, func(match string) string {
-		if strings.Contains(match, "/"+config.ZarfGitPushUser+"/") {
+		if strings.Contains(match, "/"+zarfGitPushUser+"/") {
 			message.Warnf("%s seems to have been previously patched.", match)
 			return match
 		}
-		return transformURL(host, match)
+		return transformURL(host, match, zarfGitPushUser)
 	})
 	return output
 }
@@ -43,9 +48,9 @@ func transformURLtoRepoName(url string) string {
 	return "mirror" + replaceRegex.ReplaceAllString(url, "__")
 }
 
-func transformURL(baseUrl string, url string) string {
+func transformURL(baseUrl string, url string, username string) string {
 	replaced := transformURLtoRepoName(url)
-	output := baseUrl + "/" + config.ZarfGitPushUser + "/" + replaced
+	output := baseUrl + "/" + username + "/" + replaced
 	message.Debugf("Rewrite git URL: %s -> %s", url, output)
 	return output
 }

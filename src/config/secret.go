@@ -42,6 +42,7 @@ func GetSecret(selector SecretSelector) string {
 	return ""
 }
 
+// TODO: @JPERRY If we're using an external git server I don't think we need the secret for the git push user anymore
 func initSecrets() {
 	message.Debug("config.initSecrets()")
 	for filter, selector := range selectors {

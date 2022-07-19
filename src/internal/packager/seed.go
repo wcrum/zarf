@@ -115,6 +115,7 @@ func preSeedRegistry(tempPath tempPaths) {
 
 	if config.InitOptions.GitServerInfo.GitAddress != "" {
 		state.GitServerInfo = config.InitOptions.GitServerInfo
+		message.Warnf("@JPERRY src/internal/packager/seed.preSeedRegistry( ... ) the config.InitOptions.GitServerInfo.GitAddress is: %s\n", state.GitServerInfo.GitAddress)
 	} else {
 		state.GitServerInfo.GitAddress = "http://" + config.IPV4Localhost
 		state.GitServerInfo.GitPort = 3000
