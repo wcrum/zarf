@@ -258,7 +258,7 @@ func deployComponents(tempPath tempPaths, component types.ZarfComponent) {
 
 	if hasRepos {
 		// Try repo push up to 3 times
-		for retry := 0; retry < 3; retry++ {
+		for retry := 0; retry < 1; retry++ {
 			// Push all the repos from the extracted archive
 			if err := git.PushAllDirectories(componentPath.repos); err != nil {
 				message.Errorf(err, "Unable to push repos to the Zarf Registry, retrying in 5 seconds...")

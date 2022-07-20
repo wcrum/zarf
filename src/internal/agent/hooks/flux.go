@@ -47,6 +47,10 @@ func mutateGitRepository(r *v1.AdmissionRequest) (*operations.Result, error) {
 		}
 	}
 
+	// TODO: @JPERRY just hardcoding some things!
+	// gitServerURL = "http://127.0.0.1:3000"
+	// message.Note("~~~~JPERRY~~~~ WE ARE HARDCODING THE gitServerURL")
+
 	// parse to simple struct to read the git url
 	gitRepo := &GenericGitRepo{}
 	if err := json.Unmarshal(r.Object.Raw, &gitRepo); err != nil {
@@ -56,6 +60,7 @@ func mutateGitRepository(r *v1.AdmissionRequest) (*operations.Result, error) {
 	message.Info(gitRepo.Spec.URL)
 
 	replacedURL := git.MutateGitUrlsInText(gitServerURL, gitRepo.Spec.URL)
+	message.Warnf("@@@JPERRY@@@ The repalcedURL: %s\n", replacedURL)
 	patches = append(patches, operations.ReplacePatchOperation("/spec/url", replacedURL))
 
 	// If a prior secret exists, replace it

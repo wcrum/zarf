@@ -169,10 +169,11 @@ func (r *renderer) Run(renderedManifests *bytes.Buffer) (*bytes.Buffer, error) {
 			}
 
 			// Generate the git server secret
+			// TODO: @JPERRY need to figure out how we want to do this for external git servers.. (where a readonlyuser might not exist)
 			gitServerSecret := k8s.GenerateSecret(name, config.ZarfGitServerSecretName, corev1.SecretTypeOpaque)
 			gitServerSecret.StringData = map[string]string{
-				"username": config.ZarfGitReadUser,
-				"password": config.GetSecret(config.StateGitPull),
+				"username": config.ZarfGitPushUser,
+				"password": config.GetSecret(config.StateGitPush),
 			}
 
 			// Update the git server secret
