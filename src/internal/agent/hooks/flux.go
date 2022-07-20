@@ -37,6 +37,8 @@ func mutateGitRepository(r *v1.AdmissionRequest) (*operations.Result, error) {
 
 	state := k8s.LoadZarfState()
 
+	message.Note(fmt.Sprintf("\n\nZarfState = %#v\n\n", state))
+
 	// Default to the InCluster gitURL but check if we initialized with an external server
 	gitServerURL := config.ZarfInClusterGitServiceURL
 	if !state.GitServerInfo.InternalServer {
@@ -47,9 +49,11 @@ func mutateGitRepository(r *v1.AdmissionRequest) (*operations.Result, error) {
 		}
 	}
 
+	message.Note(fmt.Sprintf("~~~JPERRY~~~ The gitServerURL: %s", gitServerURL))
 	// TODO: @JPERRY just hardcoding some things!
 	// gitServerURL = "http://127.0.0.1:3000"
-	// message.Note("~~~~JPERRY~~~~ WE ARE HARDCODING THE gitServerURL")
+	gitServerURL = config.ZarfInClusterGitServiceURL
+	message.Note(fmt.Sprintf("~~~~JPERRY~~~~ gitServerURL from hardcode: %s", gitServerURL))
 
 	// parse to simple struct to read the git url
 	gitRepo := &GenericGitRepo{}

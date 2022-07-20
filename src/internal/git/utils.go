@@ -33,6 +33,11 @@ func MutateGitUrlsInText(host string, text string) string {
 	zarfState := k8s.LoadZarfState()
 	zarfGitPushUser := zarfState.GitServerInfo.GitUsername
 
+	message.Note(fmt.Sprintf("---jperry--- the zarfGitPushUser from state: %s", zarfGitPushUser))
+
+	zarfGitPushUser = "zarf-git-user"
+	message.Note(fmt.Sprintf("---jperry--- the zarfGitPushUser being hardcoded: %s", zarfGitPushUser))
+
 	output := extractPathRegex.ReplaceAllStringFunc(text, func(match string) string {
 		if strings.Contains(match, "/"+zarfGitPushUser+"/") {
 			message.Warnf("%s seems to have been previously patched.", match)
