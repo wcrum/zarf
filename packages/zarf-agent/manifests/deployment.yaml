@@ -42,7 +42,7 @@ spec:
               mountPath: /etc/certs
               readOnly: true
             - name: zarf-state
-              mountPath: /etc/zarf-state.json
+              mountPath: /etc/zarf-state
               readOnly: true
       volumes:
         - name: tls-certs

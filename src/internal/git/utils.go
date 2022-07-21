@@ -26,24 +26,21 @@ type Credential struct {
 	Auth http.BasicAuth
 }
 
-func MutateGitUrlsInText(host string, text string) string {
+func MutateGitUrlsInText(host string, text string, gitUser string) string {
 	extractPathRegex := regexp.MustCompilePOSIX(`https?://[^/]+/(.*\.git)`)
 
 	// Get the GitPushUsername
-	zarfState := k8s.LoadZarfState()
-	zarfGitPushUser := zarfState.GitServerInfo.GitUsername
+	// zarfState := k8s.LoadZarfState()
+	// gitUser := zarfState.GitServerInfo.GitUsername
 
-	message.Note(fmt.Sprintf("---jperry--- the zarfGitPushUser from state: %s", zarfGitPushUser))
-
-	zarfGitPushUser = "zarf-git-user"
-	message.Note(fmt.Sprintf("---jperry--- the zarfGitPushUser being hardcoded: %s", zarfGitPushUser))
+	message.Note(fmt.Sprintf("---jperry--- the gitUser from state: %s", gitUser))
 
 	output := extractPathRegex.ReplaceAllStringFunc(text, func(match string) string {
-		if strings.Contains(match, "/"+zarfGitPushUser+"/") {
+		if strings.Contains(match, "/"+gitUser+"/") {
 			message.Warnf("%s seems to have been previously patched.", match)
 			return match
 		}
-		return transformURL(host, match, zarfGitPushUser)
+		return transformURL(host, match, gitUser)
 	})
 	return output
 }

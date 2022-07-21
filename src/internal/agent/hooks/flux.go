@@ -36,7 +36,7 @@ func NewGitRepositoryMutationHook() operations.Hook {
 func mutateGitRepository(r *v1.AdmissionRequest) (*operations.Result, error) {
 	var patches []operations.PatchOperation
 
-	zarfStatePath := "/etc/zarf-state.yaml"
+	zarfStatePath := "/etc/zarf-state.json/state"
 	stateFile, err := ioutil.ReadFile(zarfStatePath)
 	if err != nil {
 		message.Warnf("@JPERRY error when trying to read the zarfStateFile: %v", err)
@@ -61,10 +61,6 @@ func mutateGitRepository(r *v1.AdmissionRequest) (*operations.Result, error) {
 	}
 
 	message.Note(fmt.Sprintf("~~~JPERRY~~~ The gitServerURL: %s", gitServerURL))
-	// TODO: @JPERRY just hardcoding some things!
-	// gitServerURL = "http://127.0.0.1:3000"
-	gitServerURL = config.ZarfInClusterGitServiceURL
-	message.Note(fmt.Sprintf("~~~~JPERRY~~~~ gitServerURL from hardcode: %s", gitServerURL))
 
 	// parse to simple struct to read the git url
 	gitRepo := &GenericGitRepo{}
@@ -74,7 +70,8 @@ func mutateGitRepository(r *v1.AdmissionRequest) (*operations.Result, error) {
 
 	message.Info(gitRepo.Spec.URL)
 
-	replacedURL := git.MutateGitUrlsInText(gitServerURL, gitRepo.Spec.URL)
+	replacedURL := git.MutateGitUrlsInText(gitServerURL, gitRepo.Spec.URL, zarfState.GitServerInfo.GitUsername)
+
 	message.Warnf("@@@JPERRY@@@ The repalcedURL: %s\n", replacedURL)
 	patches = append(patches, operations.ReplacePatchOperation("/spec/url", replacedURL))
 

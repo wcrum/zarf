@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 
 	"github.com/defenseunicorns/zarf/src/config"
+	"github.com/defenseunicorns/zarf/src/internal/k8s"
 	"github.com/defenseunicorns/zarf/src/internal/packager"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -35,9 +36,12 @@ var prepareTransformGitLinks = &cobra.Command{
 			message.Fatalf(err, "Unable to read the file %s", fileName)
 		}
 
+		zarfState := k8s.LoadZarfState()
+		zarfGitUser := zarfState.GitServerInfo.GitUsername
+
 		// Perform git url transformation via regex
 		text := string(content)
-		processedText := git.MutateGitUrlsInText(host, text)
+		processedText := git.MutateGitUrlsInText(host, text, zarfGitUser)
 
 		// Ask the user before this destructive action
 		confirm := false

@@ -107,10 +107,10 @@ func prepRepoForPush(localPath, tunnelUrl, username string) (*git.Repository, er
 func push(repo *git.Repository, localPath string, spinner *message.Spinner) error {
 
 	gitCred := http.BasicAuth{
-		// Username: "gitea",
-		// Password: "password",
-		Username: config.ZarfGitPushUser,
-		Password: config.GetSecret(config.StateGitPush),
+		Username: "gitea",
+		Password: "password",
+		// Username: config.ZarfGitPushUser,
+		// Password: config.GetSecret(config.StateGitPush),
 	}
 
 	// Since we are pushing HEAD:refs/heads/master on deployment, leaving
