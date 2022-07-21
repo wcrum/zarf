@@ -16,9 +16,10 @@ import (
 
 // We can hard-code these because we control the entire thing anyway
 const (
-	httpPort = "8443"
-	tlscert  = "/etc/certs/tls.crt"
-	tlskey   = "/etc/certs/tls.key"
+	httpPort      = "8443"
+	tlscert       = "/etc/certs/tls.crt"
+	tlskey        = "/etc/certs/tls.key"
+	ZarfStatePath = "/etc/zarf-state.json"
 )
 
 // StartWebhook launches the zarf agent mutating webhook in the cluster

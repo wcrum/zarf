@@ -3,12 +3,13 @@ package hooks
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 
 	"github.com/defenseunicorns/zarf/src/config"
 	"github.com/defenseunicorns/zarf/src/internal/agent/operations"
 	"github.com/defenseunicorns/zarf/src/internal/git"
-	"github.com/defenseunicorns/zarf/src/internal/k8s"
 	"github.com/defenseunicorns/zarf/src/internal/message"
+	"github.com/defenseunicorns/zarf/src/types"
 	v1 "k8s.io/api/admission/v1"
 )
 
@@ -35,17 +36,27 @@ func NewGitRepositoryMutationHook() operations.Hook {
 func mutateGitRepository(r *v1.AdmissionRequest) (*operations.Result, error) {
 	var patches []operations.PatchOperation
 
-	state := k8s.LoadZarfState()
+	zarfStatePath := "/etc/zarf-state.yaml"
+	stateFile, err := ioutil.ReadFile(zarfStatePath)
+	if err != nil {
+		message.Warnf("@JPERRY error when trying to read the zarfStateFile: %v", err)
+	}
 
-	message.Note(fmt.Sprintf("\n\nZarfState = %#v\n\n", state))
+	var zarfState types.ZarfState
+	err = json.Unmarshal([]byte(stateFile), &zarfState)
+	if err != nil {
+		message.Warnf("@JPERRY error when trying to unmarshal the zarfState: %v", err)
+	}
+
+	message.Note(fmt.Sprintf("\n\nZarfState = %#v\n\n", zarfState))
 
 	// Default to the InCluster gitURL but check if we initialized with an external server
 	gitServerURL := config.ZarfInClusterGitServiceURL
-	if !state.GitServerInfo.InternalServer {
-		gitServerURL = state.GitServerInfo.GitAddress
+	if !zarfState.GitServerInfo.InternalServer {
+		gitServerURL = zarfState.GitServerInfo.GitAddress
 
-		if state.GitServerInfo.GitPort != 0 {
-			gitServerURL += fmt.Sprintf(":%d", state.GitServerInfo.GitPort)
+		if zarfState.GitServerInfo.GitPort != 0 {
+			gitServerURL += fmt.Sprintf(":%d", zarfState.GitServerInfo.GitPort)
 		}
 	}
 

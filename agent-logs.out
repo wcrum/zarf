@@ -1,0 +1,25 @@
+
+Error when getting the zarf-state secret:
+&errors.StatusError{
+  ErrStatus:v1.Status{ 
+    TypeMeta:v1.TypeMeta{
+      Kind:"",
+      APIVersion:"" },
+    ListMeta:v1.ListMeta{
+      SelfLink:"",
+      ResourceVersion:"",
+      Continue:"",
+      RemainingItemCount:(*int64)(nil) }, 
+    Status:"Failure", 
+    Message:"secrets "zarf-state" is forbidden: User "system:serviceaccount:zarf:default" cannot get resource "secrets" in API group "" in the namespace "zarf"",
+    Reason:"Forbidden", 
+    Details:(*v1.StatusDetails)(0xc0004065a0), 
+    Code:403 }
+}
+
+
+
+
+
+
+

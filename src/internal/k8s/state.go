@@ -29,10 +29,15 @@ func LoadZarfState() types.ZarfState {
 
 	// Set up the API connection
 	secretInterface := getZarfStateInterface()
+	message.Note(fmt.Sprintf("!!!jperry!!! the secretInterface: %#v", secretInterface))
 
 	// Try to get the zarf-state secret
-	if match, err := secretInterface.Get(context.TODO(), ZarfStateSecretName, metav1.GetOptions{}); err == nil {
+	match, err := secretInterface.Get(context.TODO(), ZarfStateSecretName, metav1.GetOptions{})
+	if err == nil {
+		message.Note("!!!jperry!!! no error when getting the zarf-state secret...")
 		_ = json.Unmarshal(match.Data[ZarfStateDataKey], &state)
+	} else if err != nil {
+		message.Note(fmt.Sprintf("!!!JPERRY!!! Error when getting the zarf-state secret: %#v", err))
 	}
 
 	message.Debugf("ZarfState = %s", message.JsonValue(state))
