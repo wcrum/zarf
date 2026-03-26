@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.74.1](https://github.com/zarf-dev/zarf/compare/v0.74.0...v0.74.1) (2026-03-26)
+
+
+### Bug Fixes
+
+* set transport in `zarf tools registry catalog` when mtls is enabled ([#4728](https://github.com/zarf-dev/zarf/issues/4728)) ([b8e38ec](https://github.com/zarf-dev/zarf/commit/b8e38ecfc4f6beb5af90da448610709e75c1b62c))
+
 ## [0.74.0](https://github.com/zarf-dev/zarf/compare/v0.73.1...v0.74.0) (2026-03-19)
 
 
